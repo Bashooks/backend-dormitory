@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.entity.Document;
@@ -13,6 +14,8 @@ import java.nio.file.Paths;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.List;
+import org.springframework.core.io.Resource;
+
 @Service
 public class DocumentService {
 
@@ -62,11 +65,53 @@ public class DocumentService {
         return documentRepository.save(document);
     }
 
+    
+
     public List<Document> getDocumentsByPersonId(Long personId) {
         return documentRepository.findByPersonId(personId);
     }
 
     public List<Document> getAllDocuments() {
         return documentRepository.findAll();
+    }
+
+
+     public Resource loadDocumentAsResource(Long documentId) throws Exception {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new Exception("Document not found"));
+
+        Path filePath = Paths.get(document.getFilePath());
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (resource.exists() || resource.isReadable()) {
+            return resource;
+        } else {
+            throw new Exception("Could not read the file: " + document.getFileName());
+        }
+    }
+
+
+    public Document updateDocumentStatus(Long documentId, String newStatus) throws Exception {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new Exception("Document not found"));
+
+        document.setStatus(newStatus);
+        return documentRepository.save(document);
+    }
+
+    public void deleteDocument(Long documentId) throws Exception {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new Exception("Document not found"));
+
+        // Delete the file from the filesystem
+        Path filePath = Paths.get(document.getFilePath());
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new Exception("Could not delete the file: " + document.getFileName(), e);
+        }
+
+        // Delete the document record from the database
+        documentRepository.delete(document);
     }
 }

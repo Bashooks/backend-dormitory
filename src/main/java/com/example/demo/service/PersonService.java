@@ -41,6 +41,10 @@ public class PersonService {
                         .claim("email", user.getEmail())
                         .claim("firstName", user.getFirstName())
                         .claim("lastName", user.getLastName())
+                        .claim("userType", user.getUserType())
+                        .claim("address", user.getAddress())
+                        
+                        .claim("gender", user.getGender())
                         .signWith(key)
                         .compact();
                 
@@ -56,9 +60,10 @@ public class PersonService {
             Person person = existingPerson.get();
             person.setFirstName(updatedPerson.getFirstName());
             person.setLastName(updatedPerson.getLastName());
-            // ไม่อัปเดตอีเมล
-            person.setPassword(updatedPerson.getPassword()); // ในกรณีที่ต้องการเปลี่ยนรหัสผ่าน
+             // ในกรณีที่ต้องการเปลี่ยนรหัสผ่าน
             person.setAddress(updatedPerson.getAddress());
+            person.setDateOfBirth(updatedPerson.getDateOfBirth()); 
+            person.setGender(updatedPerson.getGender());
             // อัปเดตฟิลด์อื่นๆ ตามที่ต้องการ
             return Optional.of(personRepository.save(person));
         }

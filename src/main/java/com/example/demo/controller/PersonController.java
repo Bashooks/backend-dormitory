@@ -38,7 +38,7 @@ public class PersonController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Person> updateUser(@PathVariable Long id, @RequestBody Person updatedPerson) {
+    public ResponseEntity<Person> updateUser(@PathVariable("id") Long id, @RequestBody Person updatedPerson) {
         Optional<Person> updatedUser = personService.updateUser(id, updatedPerson);
         if (updatedUser.isPresent()) {
             return ResponseEntity.ok(updatedUser.get());
