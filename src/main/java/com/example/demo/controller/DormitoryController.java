@@ -67,6 +67,11 @@ public class DormitoryController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/api/provinces")
+    public List<String> getProvinces() {
+        return dormitoryService.getAllProvinces();
+    }
    
 
 }

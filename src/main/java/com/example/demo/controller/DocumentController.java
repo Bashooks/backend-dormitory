@@ -84,4 +84,5 @@ public class DocumentController {
             return ResponseEntity.status(500).body("Error deleting document: " + e.getMessage());
         }
     }
+    
 }

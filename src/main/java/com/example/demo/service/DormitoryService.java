@@ -54,5 +54,8 @@ public class DormitoryService {
         return dormitoryRepository.findById(id).orElse(null);
     }
     
+    public List<String> getAllProvinces() {
+        return dormitoryRepository.findAllDistinctProvinces();
+    }
 }
 
