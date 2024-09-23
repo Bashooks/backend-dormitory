@@ -51,5 +51,17 @@ public class Dormitory {
     @ElementCollection
     @CollectionTable(name = "dormitory_images", joinColumns = @JoinColumn(name = "dormitory_id"))
     @Column(name = "image_url")
-    private List<String> imageUrls; // รายการ URL ของภาพ
+    private List<String> imageUrls; 
+    
+    @Column(nullable = false)
+    private String status; // สถานะหอพัก เช่น ว่าง, ไม่ว่าง
+
+    @Column(nullable = true)
+    private String contractUrl; // URL สัญญาหอพัก
+
+    @Column(nullable = true)
+    private String receiptUrl; // URL บิลใบเสร็จ
+
+    @Column(nullable = true)
+    private String folioUrl; // URL Folio// รายการ URL ของภาพ
 }
