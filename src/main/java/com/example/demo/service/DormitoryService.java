@@ -2,10 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Dormitory;
 import com.example.demo.repository.DormitoryRepository;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,15 +9,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.nio.file.Paths;
+
+import java.util.Arrays;
+import java.util.Optional;
+
 
 @Service
 public class DormitoryService {
 
     private final DormitoryRepository dormitoryRepository;
     private final FileStorageService fileStorageService;
-    private final Path rootLocation = Paths.get("uploads/pdf");
 
     @Autowired
     public DormitoryService(DormitoryRepository dormitoryRepository, FileStorageService fileStorageService) {
@@ -50,6 +47,19 @@ public class DormitoryService {
         return dormitoryRepository.save(dormitory);
     }
 
+    public List<String> uploadPdfFiles(MultipartFile[] pdfFiles) throws IOException {
+        List<String> pdfUrls = new ArrayList<>();
+
+        // อัปโหลดแต่ละไฟล์ PDF และเก็บ URL
+        for (MultipartFile pdf : pdfFiles) {
+            String pdfUrl = fileStorageService.storePDFFile(pdf);
+            pdfUrls.add(pdfUrl);
+        }
+
+        // ส่งคืนรายการ URLs ของไฟล์ PDF
+        return pdfUrls;
+    }
+
     public List<Dormitory> getAllDormitories() {
         return dormitoryRepository.findAll();
     }
@@ -62,37 +72,53 @@ public class DormitoryService {
         return dormitoryRepository.findAllDistinctProvinces();
     }
 
-    public List<String> uploadMultiplePdfs(MultipartFile[] files) throws IOException {
-
-        if (!Files.exists(this.rootLocation)) {
-            Files.createDirectories(this.rootLocation); // สร้างโฟลเดอร์ถ้ายังไม่มี
-        }
-        // สร้าง List สำหรับเก็บตำแหน่งไฟล์ที่อัปโหลด
-        List<String> filePaths = new ArrayList<>();
-
-        // วนลูปเพื่ออัปโหลดแต่ละไฟล์
-        for (MultipartFile file : files) {
-            String fileName = file.getOriginalFilename();
-            Path destinationFile = this.rootLocation.resolve(Paths.get(fileName))
-                    .normalize().toAbsolutePath();
-
-            // ตรวจสอบว่ามีไฟล์ชื่อเดียวกันอยู่หรือไม่ ถ้ามีให้เปลี่ยนชื่อ
-            if (Files.exists(destinationFile)) {
-                String newFileName = UUID.randomUUID().toString() + "_" + fileName;
-                destinationFile = this.rootLocation.resolve(Paths.get(newFileName))
-                        .normalize().toAbsolutePath();
-                fileName = newFileName;
-            }
-
-            // คัดลอกไฟล์ไปยังปลายทาง
-            Files.copy(file.getInputStream(), destinationFile);
-
-            // เพิ่มตำแหน่งไฟล์ที่อัปโหลดลงในรายการ
-            filePaths.add(destinationFile.toString());
-        }
-
-        // คืนค่าเป็น List ของตำแหน่งไฟล์ที่อัปโหลด
-        return filePaths;
+    public List<Dormitory> getDormitoriesByPersonId(Long personId) {
+        return dormitoryRepository.findByAddedById(personId);
     }
 
+    public Dormitory updateDormitoryStatus(Long dormitoryId, String status) {
+        Dormitory dormitory = dormitoryRepository.findById(dormitoryId).orElse(null);
+        if (dormitory != null) {
+            dormitory.setStatus(status);
+            return dormitoryRepository.save(dormitory);
+        }
+        return null;
+    }
+
+    public List<Dormitory> getDormitoriesExcludingStatus(String status) {
+        return dormitoryRepository.findByStatusNot(status);
+    }
+
+    public List<Dormitory> getAvailableDormitories() {
+        List<String> excludedStatuses = Arrays.asList("ไม่ผ่าน", "รอการอนุมัติ");
+        return dormitoryRepository.findByStatusNotIn(excludedStatuses);
+    }
+
+    public void deleteDormitoryById(Long dormitoryId) {
+        dormitoryRepository.deleteById(dormitoryId);
+    }
+
+    public Dormitory updateDormitoryDetails(Long id, String contractUrl, String receiptUrl, String folioUrl, String status) {
+        // ค้นหา Dormitory โดยใช้ ID
+        Optional<Dormitory> dormitoryOptional = dormitoryRepository.findById(id);
+        
+        if (dormitoryOptional.isPresent()) {
+            Dormitory dormitory = dormitoryOptional.get();
+
+            // อัปเดต URLs หากมีการส่งค่าเข้ามา
+            if (contractUrl != null) dormitory.setContractUrl(contractUrl);
+            if (receiptUrl != null) dormitory.setReceiptUrl(receiptUrl);
+            if (folioUrl != null) dormitory.setFolioUrl(folioUrl);
+            
+            // อัปเดตสถานะ
+            if (status != null) dormitory.setStatus(status);
+
+            // บันทึกการเปลี่ยนแปลงในฐานข้อมูล
+            return dormitoryRepository.save(dormitory);
+        } else {
+            throw new RuntimeException("Dormitory not found with id: " + id);
+        }
+    }
+
+   
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,14 +46,14 @@ public class Dormitory {
     @Column(nullable = false)
     private String contact; // ช่องทางติดต่อ
 
-    @Column(columnDefinition = "TEXT") 
+    @Column(columnDefinition = "TEXT")
     private String description; // รายละเอียดหอพัก
 
     @ElementCollection
     @CollectionTable(name = "dormitory_images", joinColumns = @JoinColumn(name = "dormitory_id"))
     @Column(name = "image_url")
-    private List<String> imageUrls; 
-    
+    private List<String> imageUrls;
+
     @Column(nullable = false)
     private String status; // สถานะหอพัก เช่น ว่าง, ไม่ว่าง
 
@@ -64,4 +65,8 @@ public class Dormitory {
 
     @Column(nullable = true)
     private String folioUrl; // URL Folio// รายการ URL ของภาพ
+
+    @ManyToOne
+    @JoinColumn(name = "person_id", nullable = false)
+    private Person addedBy; // คนที่เพิ่มหอพัก
 }

@@ -18,8 +18,6 @@ public class FileStorageService {
     // ไดเรกทอรีสำหรับเก็บไฟล์ PDF
     private final String pdfUploadDir = "/uploads/pdf/";
 
-    private final String pdfStorageLocation = "/uploads/pdf/";
-
     // Method สำหรับการเก็บไฟล์รูปภาพ
     public String storeFile(MultipartFile file) throws IOException {
         return storeFileToDirectory(file, imageUploadDir, "images");
@@ -27,7 +25,7 @@ public class FileStorageService {
 
     // Method สำหรับการเก็บไฟล์ PDF
     public String storePDFFile(MultipartFile file) throws IOException {
-        return storeFileToDirectory(file, pdfUploadDir, "pdf");
+        return storeFileToDirectory(file, pdfUploadDir, "uploads/pdf");
     }
 
     // Method สำหรับการจัดการไฟล์ใน directory ต่างๆ
@@ -57,18 +55,6 @@ public class FileStorageService {
         // ส่งคืน URL ที่สามารถเข้าถึงไฟล์นี้ได้
         return "http://localhost:8080/" + fileType + "/" + newFileName;
     }
-
-    public String storePdf(MultipartFile file) throws IOException {
-        if (!file.getContentType().equals("application/pdf")) {
-            throw new IllegalArgumentException("File must be a PDF");
-        }
-
-        // ตั้งชื่อไฟล์ด้วย UUID เพื่อให้ไม่ซ้ำกัน
-        String fileName = UUID.randomUUID().toString() + ".pdf";
-        Path targetLocation = Paths.get(pdfStorageLocation).resolve(fileName);
-        Files.copy(file.getInputStream(), targetLocation);
-
-        // คืน URL หรือ Path ของไฟล์กลับไป
-        return targetLocation.toString();
-    }
+    
 }
+
