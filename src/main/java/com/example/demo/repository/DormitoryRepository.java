@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 @Repository
 public interface DormitoryRepository extends JpaRepository<Dormitory, Long> {
-    @Query("SELECT DISTINCT d.province FROM Dormitory d")
+    @Query("SELECT DISTINCT d.province FROM Dormitory d WHERE d.status = 'ผ่าน'")
     List<String> findAllDistinctProvinces();
 
     List<Dormitory> findByAddedById(Long personId);

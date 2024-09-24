@@ -15,6 +15,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -65,8 +71,15 @@ public class Dormitory {
 
     @Column(nullable = true)
     private String folioUrl; // URL Folio// รายการ URL ของภาพ
-
+    
     @ManyToOne
     @JoinColumn(name = "person_id", nullable = false)
     private Person addedBy; // คนที่เพิ่มหอพัก
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt; // วันที่สร้างหอพัก
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
