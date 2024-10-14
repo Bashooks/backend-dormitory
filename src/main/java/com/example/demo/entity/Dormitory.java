@@ -35,6 +35,9 @@ public class Dormitory {
     private String name; // ชื่อหอพัก
 
     @Column(nullable = false)
+    private String companyname; 
+
+    @Column(nullable = false)
     private String district; // ตำบล
 
     @Column(nullable = false)
